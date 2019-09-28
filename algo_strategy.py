@@ -68,8 +68,6 @@ class AlgoStrategy(gamelib.AlgoCore):
     def starter_strategy(self, game_state):
 
         self.build_defences(game_state)
-        
-        self.start_with_scramblers(game_state)
 
         """
         # Here is the main attack strategy - needs to be improved with removing units then attacking
@@ -124,14 +122,31 @@ class AlgoStrategy(gamelib.AlgoCore):
 
         ENCRYPTOR_ON = False
         if game_state.get_resource(game_state.CORES) >= 7 * game_state.type_cost(ENCRYPTOR):
-            encryptor_locations = [[4, 11], [5, 10], [6, 9], [7, 8], [8, 7], [9, 6], [10, 5], [11, 4]]
+            encryptor_locations = [[4, 11], [5, 10], [6, 9], [7, 8], [8, 7], [9, 6], [10, 5], [11, 4], [4, 12], [3, 13], [5, 11], [6, 10], [7, 9], [10, 6], [11, 6], [11, 5], [12, 6]]
             game_state.attempt_spawn(ENCRYPTOR, encryptor_locations)
             ENCRYPTOR_ON = True
 
-        if ENCRYPTOR_ON:
-            game_state.attempt_spawn(PING, [2, 11], 1000)
-            ENCRYPTOR_ON = False
+        new_destructor_locations = [[18, 11], [19, 11], [20, 11]]
+        game_state.attempt_spawn(DESTRUCTOR, new_destructor_locations)
+        new_destructor_locations = [[18, 11], [19, 10], [20, 10]]
+        game_state.attempt_spawn(DESTRUCTOR, new_destructor_locations)
+        new_destructor_locations = [[15, 5], [16, 5], [17, 5]]
+        game_state.attempt_spawn(DESTRUCTOR, new_destructor_locations)
+        new_filter_locations = [[16, 6], [17, 6], [18, 6]]
+        game_state.attempt_spawn(FILTER, new_filter_locations)
+        new_destructor_locations = [[15, 4], [16, 4], [17, 4]]
+        game_state.attempt_spawn(DESTRUCTOR, new_destructor_locations)
 
+
+        # if ENCRYPTOR_ON:
+        #     game_state.attempt_spawn(PING, [2, 11], 1000)
+        #     ENCRYPTOR_ON = False
+
+        # attacking 
+        if game_state.turn_number > 7 and game_state.turn_number % 4 == 0:
+            self.emp_attack(game_state)
+        else:
+            self.start_with_scramblers(game_state)
 
     def build_defences(self, game_state):
         filter_locations = [[0, 13], [1, 13], [2, 13], [3, 12], [4, 13], [5, 12],
@@ -156,8 +171,6 @@ class AlgoStrategy(gamelib.AlgoCore):
         if game_state.get_resource(game_state.CORES) >= game_state.type_cost(FILTER):
             new_filter_locations = [[20, 10]]
             game_state.attempt_spawn(FILTER, new_filter_locations)
-
-        
 
 
     def advanced_build_defences(self, game_state):
@@ -259,6 +272,15 @@ class AlgoStrategy(gamelib.AlgoCore):
       
         deploy_locations = [[5, 8], [22, 8], [11, 2]]     
         game_state.attempt_spawn(SCRAMBLER, deploy_locations)
+
+    def emp_attack(self, game_state):
+        deploy_locations = [[4, 9]]
+        num_EMP = 5
+        game_state.attempt_spawn(EMP, deploy_locations, num_EMP)
+
+        deploy_locations = [4, 9]
+        num_ping = 1000
+        game_state.attempt_spawn(PING, deploy_locations, num_ping)
             
 
     def emp_line_strategy(self, game_state):
