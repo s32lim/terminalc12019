@@ -67,7 +67,52 @@ class AlgoStrategy(gamelib.AlgoCore):
 
     def starter_strategy(self, game_state):
 
+
+        blackbeardR1 = False
+        blackbeardR2 = False
+        blackbeardL1 = False
+        blackbeardL2 = False
+        hellfire1 = False
+        hellfire2 = False
+
+        if self.is_dec_diagonal(game_state, 16, 23, 23, 16):
+            blackbeardR1 = True
+
+        if self.is_dec_diagonal(game_state, 16, 22, 23, 15):
+            blackbeardR2 = True
+
+        if self.is_inc_diagonal(game_state, 4, 16, 11, 23):
+            blackbeardL1 = True
+
+        if self.is_inc_diagonal(game_state, 4, 15, 11, 22):
+            blackbeardL2 = True
+
+        if self.is_horizontal(game_state, 5, 16, 16, 16):
+            hellfire2 = True
+
+        if self.is_horizontal(game_state, 5, 15, 16, 15):
+            hellfire1 = True
+
+        if blackbeardR1 or blackbeardR2:
+            self.build_blackbeardR_defences(game_state)
+
+        if blackbeardL1 or blackbeardL2:
+            self.build_blackbeardL_defences(game_state)
+
+        if hellfire1 or hellfire2:
+            self.build_blackbeardR_defences(game_state)
+            self.build_blackbeardL_defences(game_state)
+
+        # strategic attack -- can be changed
+        if blackbeardR1 or blackbeardR2:
+            game_state.attempt_spawn(PING, [15, 1], 1000)
+                
+        if blackbeardL1 or blackbeardL2:
+            game_state.attempt_spawn(PING, [12, 1], 1000)
+                
         self.build_defences(game_state)
+        
+        self.start_with_scramblers(game_state)
 
         """
         # Here is the main attack strategy - needs to be improved with removing units then attacking
@@ -78,22 +123,7 @@ class AlgoStrategy(gamelib.AlgoCore):
                 game_state.attempt_spawn(EMP, [12, 1], 1000)
             else:
                 game_state.attempt_spawn(EMP, [15, 1], 1000)
-               
-            # add more cases
-
-        if game_state.get_resource(game_state.BITS) >= 5 * game_state.type_cost(EMP) and game_state.turn_number % 2 == 1:
-            game_state.attempt_spawn(EMP, [2, 11], 3) ## need to make this location flexible
-            game_state.attempt_spawn(PING, [15, 1], 1000)
-
-            if blackbeardR1 or blackbeardR2:
-                game_state.attempt_spawn(EMP, [25, 11], 3) ## need to make this location flexible
-                game_state.attempt_spawn(PING, [12, 1], 1000)
-                
-            if blackbeardL1 or blackbeardL2:
-                game_state.attempt_spawn(EMP, [2, 11], 3) ## need to make this location flexible
-                game_state.attempt_spawn(PING, [15, 1], 1000)
-
-            # add more cases
+       
         """
 
         new_filter_locations = [[8, 9]]
@@ -122,31 +152,14 @@ class AlgoStrategy(gamelib.AlgoCore):
 
         ENCRYPTOR_ON = False
         if game_state.get_resource(game_state.CORES) >= 7 * game_state.type_cost(ENCRYPTOR):
-            encryptor_locations = [[4, 11], [5, 10], [6, 9], [7, 8], [8, 7], [9, 6], [10, 5], [11, 4], [4, 12], [3, 13], [5, 11], [6, 10], [7, 9], [10, 6], [11, 6], [11, 5], [12, 6]]
+            encryptor_locations = [[4, 11], [5, 10], [6, 9], [7, 8], [8, 7], [9, 6], [10, 5], [11, 4]]
             game_state.attempt_spawn(ENCRYPTOR, encryptor_locations)
             ENCRYPTOR_ON = True
 
-        new_destructor_locations = [[18, 11], [19, 11], [20, 11]]
-        game_state.attempt_spawn(DESTRUCTOR, new_destructor_locations)
-        new_destructor_locations = [[18, 11], [19, 10], [20, 10]]
-        game_state.attempt_spawn(DESTRUCTOR, new_destructor_locations)
-        new_destructor_locations = [[15, 5], [16, 5], [17, 5]]
-        game_state.attempt_spawn(DESTRUCTOR, new_destructor_locations)
-        new_filter_locations = [[16, 6], [17, 6], [18, 6]]
-        game_state.attempt_spawn(FILTER, new_filter_locations)
-        new_destructor_locations = [[15, 4], [16, 4], [17, 4]]
-        game_state.attempt_spawn(DESTRUCTOR, new_destructor_locations)
+        if ENCRYPTOR_ON:
+            game_state.attempt_spawn(PING, [2, 11], 1000)
+            ENCRYPTOR_ON = False
 
-
-        # if ENCRYPTOR_ON:
-        #     game_state.attempt_spawn(PING, [2, 11], 1000)
-        #     ENCRYPTOR_ON = False
-
-        # attacking 
-        if game_state.turn_number > 7 and game_state.turn_number % 4 == 0:
-            self.emp_attack(game_state)
-        else:
-            self.start_with_scramblers(game_state)
 
     def build_defences(self, game_state):
         filter_locations = [[0, 13], [1, 13], [2, 13], [3, 12], [4, 13], [5, 12],
@@ -172,6 +185,8 @@ class AlgoStrategy(gamelib.AlgoCore):
             new_filter_locations = [[20, 10]]
             game_state.attempt_spawn(FILTER, new_filter_locations)
 
+        
+
 
     def advanced_build_defences(self, game_state):
         destructor_locations = [[0, 13], [1, 13], [2, 13], [3, 12], [4, 13], [4, 11], [5, 12], [6, 11], [7, 10], [8, 9], [9, 8], [10, 8], [11, 8],
@@ -183,20 +198,12 @@ class AlgoStrategy(gamelib.AlgoCore):
         game_state.attempt_spawn(FILTER, filter_locations)
 
     def build_blackbeardR_defences(self, game_state):
-        destructor_locations = [[27, 13], [26, 13], [26, 12], [25, 13], [25, 12]]
+        destructor_locations = [[26, 12], [25, 12], [25, 11], [24, 13], [24, 11]]
         game_state.attempt_spawn(DESTRUCTOR, destructor_locations)
 
 
     def build_blackbeardL_defences(self, game_state):
-        destructor_locations = [[0, 13], [1, 13], [1, 12], [2, 13], [2, 12]]
-        game_state.attempt_spawn(DESTRUCTOR, destructor_locations)
-
-    def build_hellfireL_defences(self, game_state):
-        destructor_locations = [[21, 10], [22, 11], [20, 9]]
-        game_state.attempt_spawn(DESTRUCTOR, destructor_locations)
-
-    def build_hellfireR_defences(self, game_state):
-        destructor_locations = [[5, 11], [6, 10], [7, 9]]
+        destructor_locations = [[1, 12], [2, 12], [2, 11], [3, 13], [3, 11]]
         game_state.attempt_spawn(DESTRUCTOR, destructor_locations)
     
 
@@ -262,7 +269,7 @@ class AlgoStrategy(gamelib.AlgoCore):
             if (game_state.game_map[check_x, check_y] != []):
                 num += 1
             check_x += 1
-        if num > 7:
+        if num > 8:
             return True
         else:
             return False
@@ -272,15 +279,6 @@ class AlgoStrategy(gamelib.AlgoCore):
       
         deploy_locations = [[5, 8], [22, 8], [11, 2]]     
         game_state.attempt_spawn(SCRAMBLER, deploy_locations)
-
-    def emp_attack(self, game_state):
-        deploy_locations = [[4, 9]]
-        num_EMP = 5
-        game_state.attempt_spawn(EMP, deploy_locations, num_EMP)
-
-        deploy_locations = [4, 9]
-        num_ping = 1000
-        game_state.attempt_spawn(PING, deploy_locations, num_ping)
             
 
     def emp_line_strategy(self, game_state):
