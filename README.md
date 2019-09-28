@@ -5,19 +5,27 @@ UPDATED INFO on Units ---
 Firewalls:
 
 Filter     - Cost 3  HP 180
+
 Encryptor  - Cost 1  HP   6  Range  1.5  Shield Provided  1  
+
 Destructor - Cost 2  HP  35  Range  3.5  Damage  16
 
 Information Units:
 
 Ping       - Cost 1  HP  15  Range  3.5  Damage   2  Speed  1 
+
 EMP        - Cost 3  HP   1  Range  4.5  Damage  15  Speed  1
+
 Scrambler  - Cost 1  HP  40  Range  4.5  Damage  20  Speed  4 (only attacks Information Units)
 
 NOTE: Speed 1 is four times faster than Speed 4
+
       Turns before bit ramp up: 5
+      
       Starting Cores: 45
+      
       Time to submit turn: 2s
+     
 
 ## File Overview
 
